@@ -9,7 +9,7 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
 
-import { version } from "./meta.js";
+import { version } from "./meta.ts";
 import { handleToolCall, tools } from "./tools/index.js";
 
 async function main() {
