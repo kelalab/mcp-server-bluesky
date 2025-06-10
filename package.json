@@ -28,7 +28,7 @@
 		"check": "biome check src",
 		"typecheck": "tsc --noEmit",
 		"publint": "publint",
-		"knip": "knip"
+		"knip": "knip",
 	 	"start": "node dist/index.js"
 	},
 	"dependencies": {
