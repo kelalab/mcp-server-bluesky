@@ -1,18 +1,24 @@
 #!/usr/bin/env node
 
+import express from "express";
+import type { Request, Response } from "express";
+
 import { AtpAgent } from "@atproto/api";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
+
 import {
 	CallToolRequestSchema,
 	ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
-import { z } from "zod";
 
-import { version } from "./meta.ts";
+import { z } from "zod";
 import { handleToolCall, tools } from "./tools/index.js";
 
 async function main() {
+	const app = express();
+	const transports: { [sessionId: string]: SSEServerTransport } = {};
+
 	const identifier = process.env.BLUESKY_USERNAME;
 	const password = process.env.BLUESKY_PASSWORD;
 	const service = process.env.BLUESKY_PDS_URL || "https://bsky.social";
@@ -37,7 +43,7 @@ async function main() {
 	const server = new Server(
 		{
 			name: "Bluesky MCP Server",
-			version,
+			version: "1.2.23",
 		},
 		{
 			capabilities: {
@@ -56,6 +62,7 @@ async function main() {
 		const { name, arguments: args } = request.params;
 
 		try {
+			console.log(name);
 			return handleToolCall(name, agent, args);
 		} catch (error) {
 			if (error instanceof z.ZodError) {
@@ -70,8 +77,43 @@ async function main() {
 		}
 	});
 
-	const transport = new StdioServerTransport();
-	await server.connect(transport);
+
+	app.get("/sse", async (req: Request, res: Response) => {
+		// Get the full URI from the request
+		const host = req.get("host");
+
+		const fullUri = `https://${host}/bluesky`;
+		const transport = new SSEServerTransport(fullUri, res);
+
+		transports[transport.sessionId] = transport;
+		res.on("close", () => {
+			delete transports[transport.sessionId];
+		});
+		await server.connect(transport);
+	});
+
+	app.post("/bluesky", async (req: Request, res: Response) => {
+	const sessionId = req.query.sessionId as string;
+	//const transport = transports[sessionId];
+	const transport = transports[Object.keys(transports)[0]];
+	if (transport) {
+		console.log("gouding to calll transpront")
+		await transport.handlePostMessage(req, res);
+	} else {
+		res.status(400).send("No transport found for sessionId");
+	}
+	});
+
+	const PORT = process.env.PORT || 3001;
+
+
+	app.get("/", (_req, res) => {
+		res.send("The bluesky MCP server is running!");
+	});
+	app.listen(PORT, () => {
+		  console.log(`✅ Server is running at http://localhost:${PORT}`);
+});
+
 }
 
 main().catch((error) => {
