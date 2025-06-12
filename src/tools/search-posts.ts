@@ -36,7 +36,7 @@ export async function handleSearchPosts(
 	args?: Record<string, unknown>,
 ) {
 	const { q, limit, cursor } = SearchPostsArgumentsSchema.parse(args);
-
+	console.log("SearchPost Query String is [" + q + "]");
 	const response = await agent.app.bsky.feed.searchPosts({ q, limit, cursor });
 
 	return {

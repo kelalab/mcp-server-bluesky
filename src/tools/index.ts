@@ -38,6 +38,7 @@ export function handleToolCall(
 	agent: AtpAgent,
 	args?: Record<string, unknown>,
 ) {
+	console.log("Bluesky args are: " + JSON.stringify(args));
 	if (name === deleteFollowTool.name) {
 		return handleDeleteFollow(agent, args);
 	}
