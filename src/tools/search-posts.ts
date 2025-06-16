@@ -40,6 +40,8 @@ export async function handleSearchPosts(
 	const response = await agent.app.bsky.feed.searchPosts({ q, limit, cursor });
 
 	return {
-		content: [{ type: "text", text: JSON.stringify(response) }],
+		const res = JSON.stringify(response);
+		console.log(res)
+		content: [{ type: "text", text: res }],
 	};
 }
