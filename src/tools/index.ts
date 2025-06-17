@@ -22,7 +22,7 @@ export const tools = [
 	//deleteRepostTool,
 	//followTool,
 	//getFollowersTool,
-	//getFollowsTool,
+	getFollowsTool,
 	//getLikesTool,
 	//getPostThreadTool,
 	//getProfileTool,
