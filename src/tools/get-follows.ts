@@ -39,7 +39,7 @@ export async function handleGetFollows(
 	const { actor, limit, cursor } = GetFollowsArgumentsSchema.parse(args);
 
 	const response = await agent.getFollows({ actor, limit, cursor });
-	console.log("GetFollows: " + JSON.stringify(response);
+	console.log("GetFollows: " + JSON.stringify(response));
 	return {
 		content: [{ type: "text", text: JSON.stringify(response) }],
 	};
